@@ -46,7 +46,7 @@ export class UsuarioService{
         where:{
             email: email
         }
-    })
+    });
 }
     async create(usuario: Usuario): Promise<Usuario>{
     return await this.usuarioRepository.save(usuario);
