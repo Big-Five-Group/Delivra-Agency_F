@@ -6,7 +6,7 @@ import { UsuarioService } from '../service/usuario.service';
 export class UsuarioController{
     constructor(private readonly usuarioService: UsuarioService){}
 
-    @Get()
+    @Get("/all")
     @HttpCode(HttpStatus.OK)
     findAll(): Promise<Usuario[]> {
         return this.usuarioService.findAll();
@@ -35,13 +35,13 @@ export class UsuarioController{
         return await this.usuarioService.findByEmail(email);
     }
 
-    @Post()
+    @Post("/cadastrar")
     @HttpCode(HttpStatus.CREATED)
     async create(@Body() usuario: Usuario): Promise<Usuario> {
         return await this.usuarioService.create(usuario);
     }
 
-    @Put()
+    @Put("/atualizar")
     @HttpCode(HttpStatus.OK)
     async update(@Body() usuario: Usuario): Promise<Usuario> {
         return await this.usuarioService.update(usuario);
@@ -53,7 +53,7 @@ export class UsuarioController{
         return await this.usuarioService.updateSenha(id, senha);
     }
 
-    @Delete('/:id')
+    @Delete('deletar/:id')
     @HttpCode(HttpStatus.NO_CONTENT)
     async delete(@Param('id') id: number): Promise<void> {
         await this.usuarioService.delete(id);
