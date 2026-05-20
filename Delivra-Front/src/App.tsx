@@ -10,7 +10,7 @@ import Login from './pages/login/Login'
 import Home from './pages/home/Home'
 import Cadastro from './pages/cadastro/Cadastro'
 import Perfil from './pages/perfil/Perfil'
-import Navbar from './components/navbar/NavBar'
+import Navbar from './components/navbar/Navbar';
 import Footer from './components/footer/Footer'
 import FiltrarSaudavel from './components/especial/filtrarsaudavel/FiltrarSaudavel'
 
