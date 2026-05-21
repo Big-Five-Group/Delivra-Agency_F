@@ -6,8 +6,8 @@ import { Usuario } from './usuario/entities/usuario.entity';
 import { UsuarioModule } from './usuario/usuario.module';
 import { Categoria } from './categoria/entities/categoria.entity';
 import { CategoriaModule } from './categoria/categoria.module';
-import { Produto } from './produtos/entities/produtos.entity';
-import { ProdutoModule } from './produtos/produtos.module';
+import { Produto } from './Produtos/entities/produtos.entity';
+import { ProdutoModule } from './Produtos/produtos.module';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { ProdutoModule } from './produtos/produtos.module';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: 'root',
+      password: 'JJpss2003$$&',
       database: 'db_delivery',
       entities: [Usuario, Categoria, Produto],
       synchronize: true,

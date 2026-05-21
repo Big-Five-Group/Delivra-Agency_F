@@ -12,18 +12,13 @@ export class CategoriaService {
     ) {}
 
     async findByTipo(tipo: string): Promise<Categoria | null> {
-
         return await this.categoriaRepository.findOne({
-
             where: { tipo }
-
         });
     }
 
     async findByDescricao(descricao: string): Promise<Categoria[]> {
-
         return await this.categoriaRepository.find({
-
             where: {
                 descricao: ILike(`%${descricao}%`)
             },
@@ -34,14 +29,15 @@ export class CategoriaService {
     }
 
     async findAll(): Promise<Categoria[]> {
-
-        return await this.categoriaRepository.find({});
+        return await this.categoriaRepository.find({
+            relations: { produtos: true } // Carrega os produtos relacionados
+        });
     }
 
     async findById(id: number): Promise<Categoria> {
-
         const categoria = await this.categoriaRepository.findOne({
-            where: { id }
+            where: { id },
+            relations: { produtos: true }
         });
 
         if (!categoria) {
@@ -52,7 +48,6 @@ export class CategoriaService {
     }
 
     async create(categoria: Categoria): Promise<Categoria> {
-
         const buscaCategoria = await this.findByTipo(categoria.tipo);
 
         if (buscaCategoria) {
@@ -63,7 +58,6 @@ export class CategoriaService {
     }
 
     async update(categoria: Categoria): Promise<Categoria> {
-
         await this.findById(categoria.id);
 
         const buscaCategoria = await this.findByTipo(categoria.tipo);
@@ -76,10 +70,17 @@ export class CategoriaService {
     }
 
     async delete(id: number): Promise<void> {
-
         const categoria = await this.findById(id);
 
-        await this.categoriaRepository.remove(categoria);
+        try {
+            // Tenta remover a categoria
+            await this.categoriaRepository.remove(categoria);
+        } catch (error) {
+            // Se falhar (ex: produtos vinculados), lança erro amigável ao invés de 500
+            throw new HttpException(
+                'Não foi possível excluir a categoria. Verifique se existem produtos vinculados a ela.',
+                HttpStatus.BAD_REQUEST
+            );
+        }
     }
-
 }

@@ -1,9 +1,9 @@
 import { Usuario } from '../entities/usuario.entity';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, HttpException } from "@nestjs/common";
 import { UsuarioService } from '../service/usuario.service';
 
 @Controller("/usuarios")
-export class UsuarioController{
+export class UsuarioController {
     constructor(private readonly usuarioService: UsuarioService){}
 
     @Get("/all")
@@ -14,9 +14,10 @@ export class UsuarioController{
 
     @Get('/:id')
     @HttpCode(HttpStatus.OK)
-    findById(@Param('id', ParseIntPipe) id:number): Promise<Usuario>{
+    findById(@Param('id', ParseIntPipe) id: number): Promise<Usuario> {
         return this.usuarioService.findById(id);
     }
+
     @Get('/nome/:nome')
     @HttpCode(HttpStatus.OK)
     async findByName(@Param('nome') nome: string): Promise<Usuario[]> {
@@ -39,6 +40,26 @@ export class UsuarioController{
     @HttpCode(HttpStatus.CREATED)
     async create(@Body() usuario: Usuario): Promise<Usuario> {
         return await this.usuarioService.create(usuario);
+    }
+
+    @Post("/logar")
+    @HttpCode(HttpStatus.OK)
+    async login(@Body() usuarioLogin: any): Promise<any> {
+        const usuariosEncontrados = await this.usuarioService.findByUsuario(usuarioLogin.usuario);
+        const usuarioValido = usuariosEncontrados.find(u => u.usuario === usuarioLogin.usuario);
+
+        if (!usuarioValido || usuarioValido.senha !== usuarioLogin.senha) {
+            throw new HttpException('Usuário ou senha inválidos!', HttpStatus.UNAUTHORIZED);
+        }
+
+        // Retorna o objeto do usuário acoplado com um token fictício para o Front aceitar
+        return {
+            id: usuarioValido.id,
+            nome: usuarioValido.nome,
+            usuario: usuarioValido.usuario,
+            foto: usuarioValido.foto,
+            token: "Bearer " + Buffer.from(usuarioValido.usuario + ":" + usuarioValido.senha).toString('base64')
+        };
     }
 
     @Put("/atualizar")

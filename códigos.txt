@@ -1,0 +1,1881 @@
+src:
+componentes:
+carrinho:
+Carrinho.tsx:
+// src/components/carrinho/Carrinho.tsx
+import { useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+
+function Carrinho() {
+  const { 
+    carrinho, 
+    atualizarQuantidadeCarrinho, 
+    removerCarrinho, 
+    limparCarrinho 
+  } = useContext(AuthContext);
+
+  // Calcula o valor total do pedido com base nos itens e quantidades
+  const valorTotal = carrinho.reduce((total, item) => {
+    return total + item.produto.preco * item.quantidade;
+  }, 0);
+
+  function finalizarPedido() {
+    alert('Pedido simulado com sucesso! Integrando com a cozinha do Delivra Agency.');
+    limparCarrinho();
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 animate-reveal-up">
+      <div className="max-w-4xl mx-auto space-y-6">
+        
+        {/* Topo do Carrinho */}
+        <div className="border-b border-brand-orange/10 pb-5">
+          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Seu Pedido</h1>
+          <p className="text-slate-500 font-medium text-sm">Confira os itens selecionados e ajuste as quantidades.</p>
+        </div>
+
+        {/* Estado do Carrinho Vazio */}
+        {carrinho.length === 0 ? (
+          <div className="bg-white p-12 rounded-[28px] text-center border border-brand-orange/5 shadow-sm space-y-4">
+            <p className="text-slate-500 font-medium">Seu carrinho de compras está vazio no momento.</p>
+            <Link 
+              to="/produtos" 
+              className="inline-block bg-brand-orange text-white px-6 py-3 rounded-xl font-bold shadow-md hover:scale-[1.01] transition-all text-sm"
+            >
+              Voltar para o Cardápio
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            {/* Lista de Itens */}
+            <div className="lg:col-span-2 space-y-4">
+              {carrinho.map((item) => (
+                <div 
+                  key={item.produto.id} 
+                  className="bg-white p-5 rounded-[20px] shadow-xs border border-brand-orange/5 flex items-center justify-between gap-4"
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Imagem ou fallback */}
+                    <div className="w-16 h-16 rounded-xl bg-slate-100 flex items-center justify-center text-2xl shrink-0 overflow-hidden">
+                      {(item.produto as any).foto ? (
+                        <img src={(item.produto as any).foto} alt={item.produto.nome} className="w-full h-full object-cover" />
+                      ) : (
+                        '🍔'
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-black text-slate-800 tracking-tight">{item.produto.nome}</h4>
+                      <p className="text-brand-green font-bold text-sm">R$ {item.produto.preco.toFixed(2)}</p>
+                    </div>
+                  </div>
+
+                  {/* Controles de Quantidade */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 overflow-hidden">
+                      <button 
+                        onClick={() => atualizarQuantidadeCarrinho(item.produto.id, item.quantidade - 1)}
+                        className="px-3 py-1.5 font-bold hover:bg-slate-200 text-slate-600 transition-colors"
+                      >
+                        -
+                      </button>
+                      <span className="px-3 font-bold text-slate-800 text-sm">{item.quantidade}</span>
+                      <button 
+                        onClick={() => atualizarQuantidadeCarrinho(item.produto.id, item.quantidade + 1)}
+                        className="px-3 py-1.5 font-bold hover:bg-slate-200 text-slate-600 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <button 
+                      onClick={() => removerCarrinho(item.produto.id)}
+                      className="text-red-500 hover:text-red-700 p-2 font-medium text-xs transition-colors"
+                      title="Remover item"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Resumo Financeiro */}
+            <div className="bg-white p-6 rounded-[24px] shadow-sm border border-brand-orange/5 space-y-6">
+              <h3 className="text-lg font-black text-slate-800 tracking-tight border-b border-slate-100 pb-3">Subtotal</h3>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-medium text-sm">Total acumulado:</span>
+                <span className="text-2xl font-black text-brand-green">R$ {valorTotal.toFixed(2)}</span>
+              </div>
+
+              <button 
+                onClick={finalizarPedido}
+                className="w-full bg-brand-orange text-white py-3.5 rounded-xl font-black shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all text-sm"
+              >
+                Confirmar e Finalizar Pedido
+              </button>
+            </div>
+
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+
+export default Carrinho;
+
+categoria:
+CardCategoria:
+// src/components/categoria/cardcategoria/CardCategoria.tsx
+import { Link } from 'react-router-dom';
+
+interface CardCategoriaProps {
+  categoria: {
+    id: number;
+    tipo: string;
+    descricao: string;
+  };
+}
+
+function CardCategoria({ categoria }: CardCategoriaProps) {
+  return (
+    <div className="bg-white p-6 rounded-[24px] shadow-sm border border-brand-orange/5 flex flex-col justify-between hover:shadow-md transition-shadow">
+      <div className="space-y-2">
+        <span className="text-[10px] font-bold bg-brand-bg text-brand-orange px-2.5 py-1 rounded-md uppercase tracking-wider">
+          ID #{categoria.id}
+        </span>
+        <h3 className="text-xl font-black text-slate-800 tracking-tight pt-1">{categoria.tipo}</h3>
+        <p className="text-slate-500 text-sm font-medium line-clamp-2">{categoria.descricao}</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-slate-50">
+        <Link
+          to={`/editarcategoria/${categoria.id}`}
+          className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-center text-xs transition-colors"
+        >
+          ✏️ Editar
+        </Link>
+        <Link
+          to={`/deletarcategoria/${categoria.id}`}
+          className="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl text-center text-xs transition-colors"
+        >
+          🗑️ Excluir
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default CardCategoria;
+
+deletarcategoria:
+DeletarCategoria.tsx:
+// src/components/categoria/deletarcategoria/DeletarCategoria.tsx
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { buscar, deletar } from '../../../services/Service';
+
+function DeletarCategoria() {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { usuarioLogado } = useContext(AuthContext);
+  const token = (usuarioLogado as any)?.token;
+
+  const [categoria, setCategoria] = useState({ id: 0, tipo: '', descricao: '' });
+  const [carregando, setCarregando] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      alert('Você precisa estar logado.');
+      navigate('/login');
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (id && token) {
+      buscar(`/categorias/${id}`, setCategoria, {
+        headers: { Authorization: token },
+      });
+    }
+  }, [id, token]);
+
+  async function apagarCategoria() {
+    setCarregando(true);
+    try {
+      await deletar(`/categorias/${id}`, {
+        headers: { Authorization: token },
+      });
+      alert('Categoria excluída com sucesso do ecossistema!');
+      navigate('/categorias');
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao excluir categoria. Verifique se existem produtos vinculados a ela.');
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 flex items-center justify-center animate-reveal-up">
+      <div className="bg-white p-8 rounded-[28px] shadow-xl w-full max-w-md border border-red-100 text-center space-y-6">
+        <div className="text-4xl animate-bounce">⚠️</div>
+        <h1 className="text-2xl font-black text-slate-800 tracking-tight">Excluir Categoria?</h1>
+        <p className="text-slate-500 text-sm font-medium">
+          Você está prestes a apagar a categoria <strong className="text-slate-800">"{categoria.tipo}"</strong>. Esta ação não poderá ser desfeita.
+        </p>
+
+        <div className="grid grid-cols-2 gap-4 pt-4">
+          <Link
+            to="/categorias"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl text-sm transition-colors text-center"
+          >
+            Cancelar
+          </Link>
+          <button
+            onClick={apagarCategoria}
+            disabled={carregando}
+            className="bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-xl text-sm shadow-md transition-all disabled:bg-slate-300"
+          >
+            {carregando ? 'Excluindo...' : 'Sim, Excluir'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default DeletarCategoria;
+
+formcategoria:
+FormCategoria.test.tsx:
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthContext';
+import FormCategoria from './FormCategoria';
+
+import '@testing-library/jest-dom';
+
+vi.mock('../../../services/Service', () => ({
+  buscar: vi.fn(),
+  cadastrar: vi.fn(),
+  atualizar: vi.fn(),
+}));
+
+const mockAuthValue = {
+  usuarioLogado: { 
+    id: 1, 
+    nome: 'Jean Pedro', 
+    usuario: 'jean@delivra.com', 
+    foto: '', 
+    senha: '', 
+    token: 'Bearer mock-token' as any 
+  },
+  logar: vi.fn(),
+  deslogar: vi.fn(),
+  carrinho: [],
+  adicionarCarrinho: vi.fn(),
+  removerCarrinho: vi.fn(),
+  atualizarQuantidadeCarrinho: vi.fn(),
+  limparCarrinho: vi.fn(),
+};
+
+describe('Componente FormCategoria', () => {
+  it('deve renderizar os campos do formulário corretamente quando logado', () => {
+    render(
+      <AuthContext.Provider value={mockAuthValue}>
+        <BrowserRouter>
+          <FormCategoria />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    );
+    
+    expect(screen.getByLabelText(/Nome da Categoria/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Breve Descrição/i)).toBeInTheDocument();
+  });
+
+  it('deve permitir preencher as informações no formulário', () => {
+    render(
+      <AuthContext.Provider value={mockAuthValue}>
+        <BrowserRouter>
+          <FormCategoria />
+        </BrowserRouter>
+      </AuthContext.Provider>
+    );
+    
+    const inputTipo = screen.getByPlaceholderText(/Ex: Pizzas Artesanais/i);
+    fireEvent.change(inputTipo, { target: { value: 'Sobremesas Gourmet' } });
+    
+    expect(inputTipo).toHaveValue('Sobremesas Gourmet');
+  });
+});
+
+FormCategoria.tsx:
+// src/components/categoria/formcategoria/FormCategoria.tsx
+import { useState, type ChangeEvent, type FormEvent, useContext, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { buscar, cadastrar, atualizar } from '../../../services/Service';
+
+function FormCategoria() {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { usuarioLogado } = useContext(AuthContext);
+  const token = (usuarioLogado as any)?.token;
+  const [carregando, setCarregando] = useState(false);
+  const [categoriaData, setCategoriaData] = useState({ id: 0, tipo: '', descricao: '' });
+
+  useEffect(() => {
+    if (id && token) {
+      buscar(`/categorias/${id}`, setCategoriaData, { headers: { Authorization: token } });
+    }
+  }, [id, token]);
+
+  function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
+    setCategoriaData({ ...categoriaData, [e.target.name]: e.target.value });
+  }
+
+  async function salvarCategoria(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setCarregando(true);
+    try {
+      if (id) {
+        await atualizar(`/categorias/atualizar`, categoriaData, () => {}, { headers: { Authorization: token } });
+        alert('Categoria atualizada!');
+      } else {
+        const { id: _, ...dadosParaEnviar } = categoriaData;
+        await cadastrar(`/categorias/cadastrar`, dadosParaEnviar, () => {}, { headers: { Authorization: token } });
+        alert('Categoria cadastrada!');
+      }
+      navigate('/categorias');
+    } catch (error) {
+      alert('Erro ao salvar.');
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 flex items-center justify-center">
+      <form onSubmit={salvarCategoria} className="bg-white p-8 rounded-[28px] shadow-xl w-full max-w-lg border border-brand-orange/10 animate-reveal-up">
+        <h1 className="text-2xl font-black text-center mb-8">{id ? 'Editar Categoria' : 'Cadastrar Categoria'}</h1>
+        <div className="flex flex-col gap-5">
+          <input name="tipo" value={categoriaData.tipo} onChange={atualizarEstado} placeholder="Nome" className="w-full px-4 py-3 border rounded-xl" required />
+          <input name="descricao" value={categoriaData.descricao} onChange={atualizarEstado} placeholder="Descrição" className="w-full px-4 py-3 border rounded-xl" required />
+        </div>
+        <button disabled={carregando} className="w-full bg-brand-orange text-white py-4 rounded-xl font-black mt-8">{carregando ? '...' : 'Salvar'}</button>
+      </form>
+    </div>
+  );
+}
+export default FormCategoria;
+
+listarcategoria:
+ListarCategoria.tsx:
+// src/components/categoria/listacategorias/ListarCategoria.tsx
+import { useContext, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { buscar, deletar } from '../../../services/Service';
+
+interface Categoria {
+  id: number;
+  tipo: string;
+  descricao: string;
+}
+
+function ListarCategoria() {
+  const navigate = useNavigate();
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const { usuarioLogado } = useContext(AuthContext);
+  const token = (usuarioLogado as any)?.token;
+
+  async function listarCategorias() {
+    try {
+      await buscar('/categorias/all', setCategorias, {
+        headers: { Authorization: token },
+      });
+    } catch (error) {
+      console.error('Erro ao listar categorias:', error);
+      alert('Erro ao carregar as categorias.');
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!token) {
+      alert('Você precisa estar logado.');
+      navigate('/login');
+    } else {
+      listarCategorias();
+    }
+  }, [token]);
+
+  async function funcaoDeletar(id: number) {
+    if (window.confirm('Tem certeza que deseja apagar esta categoria? Todos os produtos vinculados serão removidos.')) {
+      try {
+        await deletar(`/categorias/deletar/${id}`, {
+          headers: { Authorization: token },
+        });
+        alert('Categoria excluída com sucesso!');
+        setCategorias(categorias.filter((cat) => cat.id !== id));
+      } catch (error: any) {
+        console.error('Erro ao deletar:', error);
+        alert('Não foi possível excluir. Verifique se não há dependências ativas no banco de dados.');
+      }
+    }
+  }
+
+  if (carregando) {
+    return (
+      <div className="min-h-screen bg-brand-bg flex items-center justify-center">
+        <p className="text-slate-600 font-bold animate-pulse">Carregando...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 animate-reveal-up">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-brand-orange/10 pb-5">
+          <div>
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight">Categorias Registradas</h1>
+            <p className="text-slate-500 font-medium text-sm">Gerencie os agrupamentos do cardápio.</p>
+          </div>
+          <Link to="/cadastrarcategoria" className="bg-brand-orange text-white px-5 py-3 rounded-xl font-bold hover:scale-[1.02] transition-all text-center text-sm">
+            + Nova Categoria
+          </Link>
+        </div>
+
+        {categorias.length === 0 && (
+          <div className="bg-white p-12 rounded-[28px] text-center border border-dashed border-slate-300">
+            <p className="text-slate-500 font-medium">Nenhuma categoria encontrada.</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categorias.map((cat) => (
+            <div key={cat.id} className="bg-white p-6 rounded-[24px] shadow-sm border border-brand-orange/5 flex flex-col justify-between">
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold bg-brand-bg text-brand-orange px-2.5 py-1 rounded-md uppercase">ID #{cat.id}</span>
+                <h3 className="text-xl font-black text-slate-800">{cat.tipo}</h3>
+                <p className="text-slate-500 text-sm">{cat.descricao}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-slate-50">
+                <Link to={`/editarcategoria/${cat.id}`} className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-center text-xs transition-colors">✏️ Editar</Link>
+                <button onClick={() => funcaoDeletar(cat.id)} className="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl text-xs transition-colors">🗑️ Excluir</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+export default ListarCategoria;
+
+especial:
+filtrarsaudavel
+FiltrarSaudavel.tsx:
+// src/components/especial/filtrarsaudavel/FiltrarSaudavel.tsx
+import { useState } from 'react';
+import CardProduto from '../../produto/cardproduto/CardProduto';
+
+function FiltrarSaudavel() {
+  const [apenasSaudaveis, setApenasSaudaveis] = useState(false);
+
+  // Mock simulando produtos para você visualizar o filtro funcionando na tela
+  const produtosMock = [
+    { id: 1, nome: "Salada Caesar Premium", descricao: "Alface americana, croutons, queijo parmesão e molho caesar especial.", preco: 28.90, categoria: "Saudável", saudavel: true },
+    { id: 2, nome: "X-Burger Duplo", descricao: "Dois hambúrgueres de 150g, muito queijo prato e maionese artesanal.", preco: 34.90, categoria: "Lanches", saudavel: false },
+    { id: 3, nome: "Suco Natural de Laranja 500ml", descricao: "Puro suco da fruta, sem adição de açúcar ou conservantes.", preco: 12.00, categoria: "Saudável", saudavel: true },
+    { id: 4, nome: "Batata Frita Grande", descricao: "Batatas selecionadas fritas na hora, super crocantes.", preco: 18.00, categoria: "Porções", saudavel: false }
+  ];
+
+  const produtosExibidos = apenasSaudaveis 
+    ? produtosMock.filter(p => p.saudavel) 
+    : produtosMock;
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 animate-reveal-up">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Header do Filtro Especial */}
+        <div className="bg-white p-8 rounded-[32px] shadow-md border border-brand-orange/10 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="space-y-2 text-center sm:text-left">
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight">
+              Linha <span className="text-brand-green">Delivra Saúde</span> 🌿
+            </h1>
+            <p className="text-slate-500 font-medium text-sm max-w-md">
+              Encontre opções leves, nutritivas e balanceadas selecionadas especialmente para o seu bem-estar.
+            </p>
+          </div>
+
+          {/* Botão Flutuante Ativador */}
+          <button
+            onClick={() => setApenasSaudaveis(!apenasSaudaveis)}
+            className={`px-6 py-4 rounded-2xl font-black shadow-md transition-all duration-300 animate-float border-2 ${
+              apenasSaudaveis 
+                ? 'bg-brand-green text-white border-brand-green scale-105 shadow-brand-green/20' 
+                : 'bg-white text-brand-green border-brand-green/20 hover:border-brand-green'
+            }`}
+          >
+            {apenasSaudaveis ? '🟢 Mostrando Apenas Saudáveis' : '🥗 Filtrar Opções Saudáveis'}
+          </button>
+        </div>
+
+        {/* Grid de Exibição dos Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {produtosExibidos.map(produto => (
+            <CardProduto
+              key={produto.id}
+              nome={produto.nome}
+              descricao={produto.descricao}
+              preco={produto.preco}
+              categoria={produto.categoria}
+            />
+          ))}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+export default FiltrarSaudavel;
+
+footer:
+Footer.tsx:
+// src/components/footer/Footer.tsx
+function Footer() {
+  const anoAtual = new Date().getFullYear();
+
+  return (
+    <footer className="bg-white border-t border-[#f59a3a]/10 py-8 px-6 text-center text-slate-500 text-xs font-medium">
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="font-black text-sm tracking-tighter text-[#265c2e]">
+          Delivra<span className="text-[#f59a3a]">.</span> Agency
+        </div>
+        <div>
+          &copy; {anoAtual} Todos os direitos reservados. Feito com cuidado para o seu negócio.
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export default Footer;
+
+navbar:
+Navbar.tsx:
+// src/components/navbar/Navbar.tsx
+import { Link } from "react-router-dom";
+
+function Navbar() {
+  return (
+    <nav className="bg-white border-b border-[#f59a3a]/20 px-6 py-4 flex justify-between items-center shadow-sm sticky top-0 z-50">
+      {}
+      <Link to="/home" className="text-2xl font-black tracking-tighter text-[#265c2e]">
+        Delivra<span className="text-[#f59a3a]">.</span>
+      </Link>
+      
+      {}
+      <div className="flex items-center gap-8 font-semibold text-slate-600 text-sm tracking-wide">
+        <Link to="/home" className="hover:text-[#265c2e] transition-colors duration-200">Início</Link>
+        <Link to="/produtos" className="hover:text-[#265c2e] transition-colors duration-200">Produtos</Link>
+        <Link to="/categorias" className="hover:text-[#265c2e] transition-colors duration-200">Categorias</Link>
+        <Link to="/filtrarsaudavel" className="text-[#265c2e] font-bold hover:opacity-80 transition-opacity">Saudáveis</Link>
+        <Link to="/perfil" className="hover:text-[#265c2e] transition-colors duration-200">Meu Perfil</Link>
+      </div>
+
+      {}
+      <div className="flex items-center gap-4">
+        <Link to="/" className="text-sm font-bold text-slate-700 hover:text-[#265c2e] transition-colors">
+          Entrar
+        </Link>
+        <Link 
+          to="/cadastro" 
+          className="bg-[#f59a3a] hover:bg-[#e0892b] text-white text-sm font-bold px-4 py-2 rounded-full transition-all shadow-sm"
+        >
+          Criar conta
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
+export default Navbar;
+
+produto:
+cardproduto:
+CardProduto.tsx:
+// src/components/produto/cardproduto/CardProduto.tsx
+import { Link } from "react-router-dom";
+
+interface CardProdutoProps {
+  id?: number;
+  nome: string;
+  descricao: string;
+  preco: number;
+  foto?: string;
+  categoria?: string;
+}
+
+function CardProduto({ id, nome, descricao, preco, foto, categoria }: CardProdutoProps) {
+  return (
+    <div className="bg-white rounded-2xl border border-brand-orange/5 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden group animate-card-entrance">
+      
+      <div>
+        {/* Container da Imagem */}
+        <div className="w-full h-40 bg-brand-bg rounded-xl mb-4 flex items-center justify-center text-5xl overflow-hidden border border-slate-100 relative">
+          {foto ? (
+            <img src={foto} alt={nome} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          ) : (
+            <span className="group-hover:scale-110 transition-transform duration-500 select-none">🍔</span>
+          )}
+          {categoria && (
+            <span className="absolute top-2 left-2 bg-brand-green text-white font-bold text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider">
+              {categoria}
+            </span>
+          )}
+        </div>
+
+        {/* Informações */}
+        <div className="space-y-1">
+          <h3 className="font-black text-slate-800 text-base tracking-tight group-hover:text-brand-orange transition-colors line-clamp-1">
+            {nome}
+          </h3>
+          <p className="text-slate-500 text-xs font-medium line-clamp-2 leading-relaxed">
+            {descricao}
+          </p>
+        </div>
+      </div>
+
+      {/* Preço e Botões de Ação */}
+      <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-50">
+        <span className="font-black text-brand-green text-lg">
+          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(preco)}
+        </span>
+        
+        <div className="flex gap-2">
+          <Link 
+            to={`/editarproduto/${id}`} 
+            className="bg-slate-100 text-slate-700 text-[10px] font-black px-3 py-2 rounded-xl hover:bg-slate-200 transition-all"
+          >
+            Editar
+          </Link>
+          <Link 
+            to={`/deletarproduto/${id}`} 
+            className="bg-red-50 text-red-600 text-[10px] font-black px-3 py-2 rounded-xl hover:bg-red-100 transition-all"
+          >
+            Excluir
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default CardProduto;
+
+deletarproduto:
+DeletarProduto.tsx:
+// src/components/produto/deletarproduto/DeletarProduto.tsx
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { buscar, deletar } from '../../../services/Service';
+
+interface Produto {
+  id: number;
+  nome: string;
+  preco: number;
+  descricao: string;
+}
+
+function DeletarProduto() {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { usuarioLogado } = useContext(AuthContext);
+  const token = (usuarioLogado as any)?.token;
+
+  const [produto, setProduto] = useState<Produto>({ id: 0, nome: '', preco: 0, descricao: '' });
+  const [carregando, setCarregando] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      alert('Você precisa estar logado.');
+      navigate('/login');
+    } else if (id) {
+      buscar(`/produtos/${id}`, setProduto, {
+        headers: { Authorization: token },
+      });
+    }
+  }, [token, id, navigate]);
+
+  async function apagarProduto() {
+    setCarregando(true);
+    try {
+      // URL ajustada para bater com o @Delete('/deletar/:id') do seu Backend
+      await deletar(`/produtos/deletar/${id}`, {
+        headers: { Authorization: token },
+      });
+      alert('Produto removido com sucesso!');
+      navigate('/produtos');
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao excluir o produto. Verifique se ele ainda está sendo usado em alguma categoria.');
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 flex items-center justify-center animate-reveal-up">
+      <div className="bg-white p-8 rounded-[28px] shadow-xl w-full max-w-md border border-red-100 text-center space-y-6">
+        <div className="text-4xl">🗑️</div>
+        <h1 className="text-2xl font-black text-slate-800 tracking-tight">Remover Produto?</h1>
+        <p className="text-slate-500 text-sm font-medium">
+          Deseja realmente retirar o item <strong className="text-slate-800">"{produto.nome}"</strong> do cardápio ativo?
+        </p>
+
+        <div className="grid grid-cols-2 gap-4 pt-4">
+          <Link
+            to="/produtos"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl text-sm transition-colors text-center"
+          >
+            Cancelar
+          </Link>
+          <button
+            onClick={apagarProduto}
+            disabled={carregando}
+            className="bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-xl text-sm shadow-md transition-all disabled:bg-slate-400"
+          >
+            {carregando ? 'Removendo...' : 'Confirmar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default DeletarProduto;
+
+formproduto:
+FormProduto.tsx:
+// src/components/produto/formproduto/FormProduto.tsx
+import { useState, type ChangeEvent, type FormEvent, useContext, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { buscar, cadastrar, atualizar } from '../../../services/Service';
+
+interface Categoria {
+  id: number;
+  tipo: string;
+}
+
+function FormProduto() {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { usuarioLogado } = useContext(AuthContext);
+  const token = (usuarioLogado as any)?.token;
+
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [carregando, setCarregando] = useState(false);
+  const [produtoData, setProdutoData] = useState({
+    id: 0,
+    nome: '',
+    preco: 0,
+    foto: '',
+    descricao: '',
+    categoria: { id: 0 }
+  });
+
+  // Busca lista de categorias para o SELECT
+  useEffect(() => {
+    buscar('/categorias/all', setCategorias, { headers: { Authorization: token } });
+    if (id) {
+      buscar(`/produtos/${id}`, setProdutoData, { headers: { Authorization: token } });
+    }
+  }, [id, token]);
+
+  function atualizarEstado(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    if (e.target.name === 'categoria') {
+      setProdutoData({ ...produtoData, categoria: { id: Number(e.target.value) } });
+    } else {
+      setProdutoData({ ...produtoData, [e.target.name]: e.target.value });
+    }
+  }
+
+  async function salvarProduto(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setCarregando(true);
+
+    const payload = {
+      ...produtoData,
+      preco: Number(produtoData.preco),
+      categoria: { id: Number(produtoData.categoria.id) }
+    };
+
+    try {
+      if (id) {
+        await atualizar(`/produtos/atualizar`, { ...payload, id: Number(id) }, () => {}, { 
+          headers: { Authorization: token } 
+        });
+        alert('Produto atualizado!');
+      } else {
+        await cadastrar(`/produtos/cadastrar`, { ...payload, id: undefined }, () => {}, { 
+          headers: { Authorization: token } 
+        });
+        alert('Produto cadastrado!');
+      }
+      navigate('/produtos');
+    } catch (error) {
+      alert('Erro ao salvar. Verifique se escolheu a categoria.');
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 flex items-center justify-center">
+      <form onSubmit={salvarProduto} className="bg-white p-8 rounded-[28px] shadow-xl w-full max-w-lg border border-brand-orange/10">
+        <h1 className="text-2xl font-black text-slate-800 text-center mb-8">
+          {id ? 'Editar Produto' : 'Novo Produto'}
+        </h1>
+
+        <div className="flex flex-col gap-5">
+          <input name="nome" type="text" placeholder="Nome" value={produtoData.nome} onChange={atualizarEstado} required className="w-full px-4 py-3 border border-slate-200 rounded-xl" />
+          <input name="preco" type="number" step="0.01" placeholder="Preço" value={produtoData.preco} onChange={atualizarEstado} required className="w-full px-4 py-3 border border-slate-200 rounded-xl" />
+          <input name="descricao" type="text" placeholder="Descrição" value={produtoData.descricao} onChange={atualizarEstado} required className="w-full px-4 py-3 border border-slate-200 rounded-xl" />
+          
+          {/* SELETOR DE CATEGORIA AUTOMÁTICO */}
+          <select name="categoria" value={produtoData.categoria.id} onChange={atualizarEstado} required className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white">
+            <option value="">Selecione uma categoria</option>
+            {categorias.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.tipo}</option>
+            ))}
+          </select>
+        </div>
+
+        <button type="submit" disabled={carregando} className="w-full bg-brand-orange text-white py-4 rounded-xl font-black mt-8 hover:opacity-90">
+          {carregando ? 'Salvando...' : 'Confirmar'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+export default FormProduto;
+
+listarproduto:
+ListarProduto.tsx:
+// src/components/produto/listarproduto/ListarProduto.tsx
+import { useContext, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../../contexts/AuthContext';
+import { buscar } from '../../../services/Service';
+import CardProduto from '../cardproduto/CardProduto'; // Certifique-se de importar o componente
+
+interface Produto {
+  id: number;
+  nome: string;
+  preco: number;
+  foto: string;
+  descricao: string;
+  categoria: {
+    tipo: string;
+  } | null;
+}
+
+function ListarProduto() {
+  const navigate = useNavigate();
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const { usuarioLogado } = useContext(AuthContext);
+  const token = (usuarioLogado as any)?.token;
+
+  async function listarProdutos() {
+    try {
+      await buscar('/produtos/all', setProdutos, {
+        headers: { Authorization: token },
+      });
+    } catch (error) {
+      console.error('Erro ao listar:', error);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+    } else {
+      listarProdutos();
+    }
+  }, [token]);
+
+  if (carregando) return <div className="p-10 text-center">Carregando cardápio...</div>;
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-black text-slate-800">Cardápio</h1>
+          <Link to="/cadastrarproduto" className="bg-brand-orange text-white px-4 py-2 rounded-xl font-bold">
+            + Novo Produto
+          </Link>
+        </div>
+        
+        {produtos.length === 0 && <p className="text-center">Nenhum produto cadastrado.</p>}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {produtos.map((prod) => (
+            <CardProduto 
+              key={prod.id}
+              id={prod.id}
+              nome={prod.nome}
+              preco={prod.preco}
+              descricao={prod.descricao}
+              foto={prod.foto}
+              categoria={prod.categoria?.tipo}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ListarProduto;
+
+contexts:
+AuthContext.tsx:
+import { createContext, useState, type ReactNode } from "react";
+import type Usuario from "../models/Usuario";
+import type Produto from "../models/Produto";
+
+interface CartItem {
+  produto: Produto;
+  quantidade: number;
+}
+
+interface AuthContextType {
+  usuarioLogado: Usuario | null;
+  logar: (usuario: Usuario) => void;
+  deslogar: () => void;
+  carrinho: CartItem[];
+  adicionarCarrinho: (produto: Produto) => void;
+  removerCarrinho: (produtoId: number) => void;
+  atualizarQuantidadeCarrinho: (produtoId: number, quantidade: number) => void;
+  limparCarrinho: () => void;
+}
+
+export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+  const [carrinho, setCarrinho] = useState<CartItem[]>([]);
+
+  function logar(usuario: Usuario) {
+    setUsuarioLogado(usuario);
+  }
+
+  function deslogar() {
+    setUsuarioLogado(null);
+    setCarrinho([]);
+  }
+
+  function adicionarCarrinho(produto: Produto) {
+    setCarrinho((itemsAtuais) => {
+      const itemExiste = itemsAtuais.find((item) => item.produto.id === produto.id);
+      if (itemExiste) {
+        return itemsAtuais.map((item) =>
+          item.produto.id === produto.id ? { ...item, quantidade: item.quantidade + 1 } : item
+        );
+      }
+      return [...itemsAtuais, { produto, quantidade: 1 }];
+    });
+  }
+
+  function removerCarrinho(produtoId: number) {
+    setCarrinho((itemsAtuais) => itemsAtuais.filter((item) => item.produto.id !== produtoId));
+  }
+
+  function atualizarQuantidadeCarrinho(produtoId: number, quantidade: number) {
+    if (quantidade <= 0) {
+      removerCarrinho(produtoId);
+      return;
+    }
+    setCarrinho((itemsAtuais) =>
+      itemsAtuais.map((item) =>
+        item.produto.id === produtoId ? { ...item, quantidade } : item
+      )
+    );
+  }
+
+  function limparCarrinho() {
+    setCarrinho([]);
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{
+        usuarioLogado,
+        logar,
+        deslogar,
+        carrinho,
+        adicionarCarrinho,
+        removerCarrinho,
+        atualizarQuantidadeCarrinho,
+        limparCarrinho,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+pages:
+cadastro:
+Cadastro.tsx:
+// src/pages/cadastro/Cadastro.tsx
+import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { cadastrarUsuario } from '../../services/Service';
+
+function Cadastro() {
+  const navigate = useNavigate();
+  const [carregando, setCarregando] = useState(false);
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+
+  const [usuarioData, setUsuarioData] = useState({
+    nome: '',
+    usuario: '',
+    senha: '',
+    foto: ''
+  });
+
+  function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
+    setUsuarioData({
+      ...usuarioData,
+      [e.target.name]: e.target.value
+    });
+  }
+
+  async function executarCadastro(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setCarregando(true);
+
+    if (usuarioData.senha !== confirmarSenha) {
+      alert('Atenção: As senhas digitadas não coincidem.');
+      setCarregando(false);
+      return;
+    }
+
+    try {
+      // Envia os dados para a rota pública de criação de usuários
+      await cadastrarUsuario('/usuarios/cadastrar', usuarioData, () => {});
+      alert('Operador cadastrado com sucesso no ecossistema!');
+      navigate('/login'); // Redireciona direto para a tela de login
+    } catch (error) {
+      console.error('Erro ao cadastrar operador:', error);
+      alert('Erro ao processar cadastro. Verifique os dados ou se o e-mail já existe.');
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 flex items-center justify-center">
+      <form 
+        onSubmit={executarCadastro}
+        className="bg-white p-8 rounded-[28px] shadow-xl w-full max-w-md border border-brand-orange/10 animate-reveal-up"
+      >
+        <div className="text-4xl mb-3 text-center animate-float">📝</div>
+        <h1 className="text-2xl font-black text-slate-800 text-center mb-1 tracking-tight">Criar Conta</h1>
+        <p className="text-center text-slate-500 text-xs mb-8">Registre-se para gerenciar o ecossistema de entregas</p>
+
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="nome" className="text-xs font-bold text-slate-700 tracking-wide">Nome Completo</label>
+            <input 
+              id="nome" type="text" name="nome" placeholder="Ex: Jean Pedro"
+              value={usuarioData.nome} onChange={atualizarEstado} required
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-orange bg-slate-50 text-slate-800 font-medium transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="usuario" className="text-xs font-bold text-slate-700 tracking-wide">E-mail (Será seu Usuário)</label>
+            <input 
+              id="usuario" type="email" name="usuario" placeholder="jean@delivra.com"
+              value={usuarioData.usuario} onChange={atualizarEstado} required
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-orange bg-slate-50 text-slate-800 font-medium transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="foto" className="text-xs font-bold text-slate-700 tracking-wide">URL da Foto de Perfil (Opcional)</label>
+            <input 
+              id="foto" type="text" name="foto" placeholder="https://github.com/seuusuario.png"
+              value={usuarioData.foto} onChange={atualizarEstado}
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-orange bg-slate-50 text-slate-800 font-medium transition-all"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="senha" className="text-xs font-bold text-slate-700 tracking-wide">Senha</label>
+              <input 
+                id="senha" type="password" name="senha" placeholder="••••••••"
+                value={usuarioData.senha} onChange={atualizarEstado} required
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-orange bg-slate-50 text-slate-800 font-medium transition-all"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="confirmarSenha" className="text-xs font-bold text-slate-700 tracking-wide">Confirmar Senha</label>
+              <input 
+                id="confirmarSenha" type="password" name="confirmarSenha" placeholder="••••••••"
+                value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} required
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-orange bg-slate-50 text-slate-800 font-medium transition-all"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button 
+          type="submit" disabled={carregando}
+          className="w-full bg-brand-orange text-white py-4 rounded-xl font-black mt-8 shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all disabled:bg-slate-300"
+        >
+          {carregando ? 'Processando...' : 'Finalizar Cadastro'}
+        </button>
+
+        <p className="text-center text-slate-500 text-xs mt-6">
+          Já possui registro?{' '}
+          <Link to="/login" className="text-brand-orange font-bold hover:underline">
+            Faça login aqui
+          </Link>
+        </p>
+      </form>
+    </div>
+  );
+}
+
+export default Cadastro;
+
+home:
+Home.tsx:
+// src/pages/home/Home.tsx
+import { useState, type ChangeEvent } from 'react';
+import { Link } from 'react-router-dom';
+
+function Home() {
+  const [busca, setBusca] = useState('');
+
+  function lidarComBusca(e: ChangeEvent<HTMLInputElement>) {
+    setBusca(e.target.value);
+    // Aqui futuramente podes filtrar a listagem de produtos em tempo real
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-bg text-slate-900 transition-colors duration-300">
+      
+      {/* Hero Banner - Estilo iFood Animado */}
+      <div className="max-w-6xl mx-auto px-4 pt-12 pb-8 animate-reveal-up">
+        <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-md border border-brand-orange/10 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group">
+          
+          <div className="max-w-xl space-y-6 z-10 w-full">
+            <span className="bg-brand-green/10 text-brand-green font-black text-xs px-4 py-1.5 rounded-full uppercase tracking-wider animate-pulse inline-block">
+              Delivra Agency
+            </span>
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none">
+              Tudo para facilitar o seu <span className="text-brand-orange drop-shadow-[0_0_10px_rgba(245,154,58,0.2)]">Delivery</span>.
+            </h1>
+            <p className="text-slate-600 font-medium text-lg">
+              Gerencie seus produtos, categorias e restaurantes parceiros em um só lugar com a eficiência que seu negócio precisa.
+            </p>
+            
+            {/* Barra de Busca 100% Ativa e Funcional */}
+            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-3 max-w-md shadow-inner focus-within:border-brand-orange focus-within:bg-white transition-all duration-300">
+              <span className="px-2 text-xl text-slate-400">🔍</span>
+              <input 
+                type="text" 
+                value={busca}
+                onChange={lidarComBusca}
+                placeholder="Busque por pratos, ingredientes ou categorias..." 
+                className="bg-transparent w-full focus:outline-none text-slate-700 font-bold text-sm placeholder-slate-400"
+              />
+            </div>
+          </div>
+
+          {/* Ilustração / Lado Direito com Flutuação */}
+          <div className="bg-brand-bg w-64 h-64 md:w-80 md:h-80 rounded-[24px] flex items-center justify-center text-7xl shadow-md border-4 border-white animate-float transition-all duration-500 hover:scale-105 shrink-0">
+            🍔
+          </div>
+
+        </div>
+      </div>
+
+      {/* Atalhos Rápidos de Categorias - TODOS ATIVOS AGORA 🚀 */}
+      <div className="max-w-6xl mx-auto px-4 pb-16">
+        <h2 className="text-xl font-black text-slate-800 mb-6 tracking-tight flex items-center gap-2">
+          <span className="w-2 h-6 bg-brand-orange rounded-full"></span>
+          Navegue por Ecossistemas
+        </h2>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          
+          {/* CARD PRODUTOS */}
+          <Link to="/produtos" className="bg-white p-6 rounded-2xl text-center shadow-sm border border-brand-orange/5 hover:border-brand-orange/40 hover:-translate-y-2 transition-all duration-300 group animate-card-entrance [animation-delay:100ms]">
+            <div className="text-3xl mb-2 group-hover:scale-125 transition-transform duration-300">📦</div>
+            <span className="font-bold text-slate-800 text-sm block group-hover:text-brand-orange transition-colors">Produtos</span>
+          </Link>
+
+          {/* CARD CATEGORIAS */}
+          <Link to="/categorias" className="bg-white p-6 rounded-2xl text-center shadow-sm border border-brand-orange/5 hover:border-brand-orange/40 hover:-translate-y-2 transition-all duration-300 group animate-card-entrance [animation-delay:200ms]">
+            <div className="text-3xl mb-2 group-hover:scale-125 transition-transform duration-300">🗂️</div>
+            <span className="font-bold text-slate-800 text-sm block group-hover:text-brand-orange transition-colors">Categorias</span>
+          </Link>
+
+          {/* CARD RESTAURANTES - ATIVADO */}
+          <Link to="/restaurantes" className="bg-white p-6 rounded-2xl text-center shadow-sm border border-brand-orange/5 hover:border-brand-orange/40 hover:-translate-y-2 transition-all duration-300 group animate-card-entrance [animation-delay:300ms]">
+            <div className="text-3xl mb-2 group-hover:scale-125 transition-transform duration-300">🏪</div>
+            <span className="font-bold text-slate-800 text-sm block group-hover:text-brand-orange transition-colors">Restaurantes</span>
+          </Link>
+
+          {/* CARD RELATÓRIOS - ATIVADO */}
+          <Link to="/relatorios" className="bg-white p-6 rounded-2xl text-center shadow-sm border border-brand-orange/5 hover:border-brand-orange/40 hover:-translate-y-2 transition-all duration-300 group animate-card-entrance [animation-delay:400ms]">
+            <div className="text-3xl mb-2 group-hover:scale-125 transition-transform duration-300">📊</div>
+            <span className="font-bold text-slate-800 text-sm block group-hover:text-brand-orange transition-colors">Relatórios</span>
+          </Link>
+
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+export default Home;
+
+login:
+Login.tsx:
+// src/pages/login/Login.tsx
+import { useState, type ChangeEvent, type FormEvent, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+import { login } from '../../services/Service';
+
+function Login() {
+  const navigate = useNavigate();
+  const { logar } = useContext(AuthContext);
+  const [carregando, setCarregando] = useState(false);
+
+  const [usuarioLogin, setUsuarioLogin] = useState({
+    usuario: '',
+    senha: ''
+  });
+
+  function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
+    setUsuarioLogin({
+      ...usuarioLogin,
+      [e.target.name]: e.target.value
+    });
+  }
+
+  async function executarLogin(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setCarregando(true);
+
+    try {
+      let respostaUsuario: any = {};
+      
+      await login('/usuarios/logar', usuarioLogin, (dados: any) => {
+        respostaUsuario = dados;
+      });
+
+      if (respostaUsuario.token) {
+        logar(respostaUsuario); 
+        alert(`Bem-vindo de volta, ${respostaUsuario.nome || 'Usuário'}!`);
+        navigate('/produtos');
+      } else {
+        alert('Falha na autenticação. Dados inconsistentes recebidos do servidor.');
+      }
+    } catch (error) {
+      console.error('Erro ao autenticar:', error);
+      alert('Credenciais inválidas ou erro de conexão com o servidor.');
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 flex items-center justify-center">
+      <form 
+        onSubmit={executarLogin}
+        className="bg-white p-8 rounded-[28px] shadow-xl w-full max-w-md border border-brand-orange/10 animate-reveal-up"
+      >
+        <div className="text-4xl mb-3 text-center animate-float">🚀</div>
+        <h1 className="text-2xl font-black text-slate-800 text-center mb-1 tracking-tight">Acessar Painel</h1>
+        <p className="text-center text-slate-500 text-xs mb-8">Entre com suas credenciais do Delivra Agency</p>
+
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="usuario" className="text-xs font-bold text-slate-700 tracking-wide">E-mail / Usuário</label>
+            <input 
+              id="usuario" type="text" name="usuario" placeholder="seuemail@delivra.com"
+              value={usuarioLogin.usuario} onChange={atualizarEstado} required
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-orange bg-slate-50 text-slate-800 font-medium transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="senha" className="text-xs font-bold text-slate-700 tracking-wide">Senha</label>
+            <input 
+              id="senha" type="password" name="senha" placeholder="••••••••"
+              value={usuarioLogin.senha} onChange={atualizarEstado} required
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-orange bg-slate-50 text-slate-800 font-medium transition-all"
+            />
+          </div>
+        </div>
+
+        <button 
+          type="submit" disabled={carregando}
+          className="w-full bg-brand-orange text-white py-4 rounded-xl font-black mt-8 shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all disabled:bg-slate-300"
+        >
+          {carregando ? 'Autenticando...' : 'Entrar no Sistema'}
+        </button>
+
+        <p className="text-center text-slate-500 text-xs mt-6">
+          Não possui uma conta?{' '}
+          <Link to="/cadastro" className="text-brand-orange font-bold hover:underline">
+            Cadastre-se aqui
+          </Link>
+        </p>
+      </form>
+    </div>
+  );
+}
+
+export default Login;
+
+perfil:
+Perfil.tsx:
+// src/pages/perfil/Perfil.tsx
+import { useContext } from 'react';
+import { AuthContext } from '../../contexts/AuthContext';
+
+function Perfil() {
+  const { usuarioLogado, carrinho, atualizarQuantidadeCarrinho, removerCarrinho, limparCarrinho } = useContext(AuthContext);
+
+  const valorTotal = carrinho.reduce((acc, item) => acc + item.produto.preco * item.quantidade, 0);
+
+  if (!usuarioLogado) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-slate-600 text-lg">Faça login para ver seu perfil e carrinho.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Dados do Usuário */}
+      <div className="bg-white p-6 border border-slate-200 rounded-2xl shadow-sm h-fit">
+        <h2 className="text-xl font-bold text-slate-800 mb-4">Seu Perfil</h2>
+        <div className="flex flex-col items-center text-center">
+          <img 
+            src={usuarioLogado.foto || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"} 
+            alt={usuarioLogado.nome} 
+            className="w-24 h-24 rounded-full object-cover border-4 border-emerald-400 mb-4 shadow-inner"
+          />
+          <h3 className="text-lg font-bold text-slate-800">{usuarioLogado.nome}</h3>
+          <p className="text-sm text-slate-500">{usuarioLogado.usuario}</p>
+        </div>
+      </div>
+
+      {/* Tela do Carrinho Integrado */}
+      <div className="md:col-span-2 bg-white p-6 border border-slate-200 rounded-2xl shadow-sm">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-black text-slate-800">Seu Carrinho</h2>
+          {carrinho.length > 0 && (
+            <button onClick={limparCarrinho} className="text-xs text-red-500 hover:underline font-bold">
+              Limpar tudo
+            </button>
+          )}
+        </div>
+
+        {carrinho.length === 0 ? (
+          <div className="text-center py-12 text-slate-400">
+            <p className="mb-2">Seu carrinho está vazio.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {carrinho.map((item) => (
+              <div key={item.produto.id} className="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                  <h4 className="font-bold text-slate-800">{item.produto.nome}</h4>
+                  <p className="text-sm text-emerald-600 font-semibold">
+                    R$ {Number(item.produto.preco).toFixed(2)} un.
+                  </p>
+                </div>
+                
+                {/* Operações do Carrinho */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden">
+                    <button 
+                      onClick={() => atualizarQuantidadeCarrinho(item.produto.id, item.quantidade - 1)}
+                      className="px-2 py-1 bg-slate-50 hover:bg-slate-100 font-bold"
+                    >
+                      -
+                    </button>
+                    <span className="px-3 py-1 text-sm font-semibold text-slate-700 bg-white">
+                      {item.quantidade}
+                    </span>
+                    <button 
+                      onClick={() => atualizarQuantidadeCarrinho(item.produto.id, item.quantidade + 1)}
+                      className="px-2 py-1 bg-slate-50 hover:bg-slate-100 font-bold"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <button 
+                    onClick={() => removerCarrinho(item.produto.id)}
+                    className="text-red-500 hover:text-red-700 text-sm font-semibold"
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <div className="pt-4 flex justify-between items-center">
+              <span className="text-lg font-bold text-slate-700">Valor Total:</span>
+              <span className="text-2xl font-black text-emerald-600">
+                R$ {valorTotal.toFixed(2)}
+              </span>
+            </div>
+            <button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl mt-4 shadow-md transition">
+              Fechar Pedido
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default Perfil;
+
+relatorios:
+Relatorios.tsx:
+// src/pages/relatorios/Relatorios.tsx
+import { useState } from 'react';
+
+function Relatorios() {
+  // Simulação de dados vindos de uma tabela de "Pedidos" do banco de dados
+  const [pedidosSimulados] = useState([
+    { id: 101, cliente: "Carlos Silva", item: "Pizza Margherita", valor: 45.90, dia: "Seg" },
+    { id: 102, cliente: "Ana Souza", item: "Salada Caesar Premium", valor: 28.90, dia: "Ter" },
+    { id: 103, cliente: "Bruno Lima", item: "X-Burger Duplo", valor: 34.90, dia: "Qua" },
+    { id: 104, cliente: "Mariana Costa", item: "Suco de Laranja 500ml", valor: 12.00, dia: "Qui" },
+    { id: 105, cliente: "Roberto Alves", item: "Combo Burger + Batata", valor: 52.90, dia: "Sex" },
+    { id: 106, cliente: "Juliana Meireles", item: "Pizza Pepperoni", valor: 49.90, dia: "Sáb" },
+    { id: 107, cliente: "Lucas Fernandes", item: "Açaí na Tigela 700ml", valor: 25.00, dia: "Dom" },
+  ]);
+
+  // Regra de Negócio Simulada: Cálculos automáticos
+  const totalFaturamento = pedidosSimulados.reduce((acc, pedido) => acc + pedido.valor, 0);
+  const totalPedidos = pedidosSimulados.length;
+  const ticketMedio = totalFaturamento / totalPedidos;
+  
+  // Cálculo do faturamento médio por dia (7 dias da semana)
+  const mediaDiariaSemana = totalFaturamento / 7;
+
+  // Escala lateral do gráfico
+  const linhasGrade = [100, 80, 60, 40, 20, 0];
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 animate-reveal-up">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Título da Tela */}
+        <div className="space-y-1">
+          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Relatórios do Ecossistema</h1>
+          <p className="text-slate-500 font-medium text-sm">Métricas calculadas em tempo real com base no fluxo de vendas.</p>
+        </div>
+
+        {/* Cards de Métricas Inteligentes (KPIs) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* CARD 1: FATURAMENTO ACUMULADO */}
+          <div className="bg-white p-6 rounded-[28px] shadow-sm border border-brand-orange/5 flex items-center gap-5 animate-card-entrance">
+            <div className="text-4xl p-4 bg-brand-bg rounded-2xl animate-float">💰</div>
+            <div>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Faturamento Total</p>
+              <h2 className="text-2xl font-black text-brand-green">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalFaturamento)}
+              </h2>
+            </div>
+          </div>
+
+          {/* CARD 2: TOTAL PEDIDOS */}
+          <div className="bg-white p-6 rounded-[28px] shadow-sm border border-brand-orange/5 flex items-center gap-5 animate-card-entrance [animation-delay:100ms]">
+            <div className="text-4xl p-4 bg-brand-bg rounded-2xl animate-float">📦</div>
+            <div>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Pedidos Processados</p>
+              <h2 className="text-2xl font-black text-brand-orange">{totalPedidos} un</h2>
+            </div>
+          </div>
+
+          {/* CARD 3: TICKET MÉDIO */}
+          <div className="bg-white p-6 rounded-[28px] shadow-sm border border-brand-orange/5 flex items-center gap-5 animate-card-entrance [animation-delay:200ms]">
+            <div className="text-4xl p-4 bg-brand-bg rounded-2xl animate-float">📈</div>
+            <div>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Ticket Médio por Venda</p>
+              <h2 className="text-2xl font-black text-slate-700">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ticketMedio)}
+              </h2>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Seção Combinada: Gráfico + Detalhes Semanais */}
+        <div className="bg-white p-8 rounded-[32px] shadow-md border border-brand-orange/5 grid grid-cols-1 lg:grid-cols-4 gap-8">
+          
+          {/* Área do Gráfico (Ocupa 3 colunas) */}
+          <div className="lg:col-span-3 space-y-6">
+            <div>
+              <h3 className="font-black text-slate-800 text-xl tracking-tight">Desempenho dos Dias</h3>
+              <p className="text-slate-400 text-xs">Passe o mouse sobre as barras para ver os valores de cada dia.</p>
+            </div>
+            
+            {/* Gráfico Customizado com Linhas de Grade de Fundo */}
+            <div className="relative h-72 mt-8 flex flex-col justify-between">
+              
+              {/* Camada das linhas horizontais */}
+              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pl-10 pr-2 pb-8">
+                {linhasGrade.map((porcentagem) => (
+                  <div key={porcentagem} className="w-full flex items-center gap-4">
+                    <span className="text-xs font-bold text-slate-400 w-8 text-right">{porcentagem}%</span>
+                    <div className="grow border-b border-slate-200/60"></div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Camada das Barras */}
+              <div className="relative h-full grow flex items-end justify-between pl-14 pr-4 pb-8 z-10 gap-2">
+                {pedidosSimulados.map((pedido) => {
+                  // Altura baseada proporcionalmente no maior valor do array (52.90)
+                  const alturaPorcentagem = (pedido.valor / 55) * 100;
+                  
+                  return (
+                    <div key={pedido.id} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                      
+                      <span className="text-[10px] font-bold text-slate-600 mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        R$ {pedido.valor.toFixed(2)}
+                      </span>
+
+                      <div 
+                        style={{ height: `${alturaPorcentagem}%` }} 
+                        className="w-full max-w-[45px] bg-brand-bg border-2 border-brand-orange/20 rounded-t-xl group-hover:bg-brand-orange group-hover:border-brand-orange transition-all duration-300 relative cursor-pointer shadow-inner"
+                      >
+                        {/* Tooltip flutuante clássico */}
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2.5 rounded-lg font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg z-30 text-center whitespace-nowrap">
+                          <p className="font-black">R$ {pedido.valor.toFixed(2)}</p>
+                          <p className="text-[8px] text-slate-400 font-medium">Processado</p>
+                        </div>
+                      </div>
+
+                      <span className="absolute -bottom-6 text-[11px] font-black text-slate-400 uppercase">
+                        {pedido.dia}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+          </div>
+
+          {/* BLOCO: FATURAMENTO NA SEMANA (Ocupa 1 coluna) */}
+          <div className="bg-slate-50 p-6 rounded-2xl flex flex-col justify-between border border-slate-100">
+            <div className="space-y-4">
+              <h4 className="font-black text-slate-800 text-sm uppercase tracking-wide">Faturamento na Semana</h4>
+              
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Acumulado (7 Dias)</span>
+                <span className="text-2xl font-black text-brand-orange block">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalFaturamento)}
+                </span>
+              </div>
+
+              <div className="space-y-1 pt-2 border-t border-slate-200">
+                <span className="text-[10px] font-bold text-slate-400 uppercase block">Média Diária</span>
+                <span className="text-base font-bold text-slate-700 block">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(mediaDiariaSemana)}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 bg-brand-green/10 text-brand-green p-3 rounded-xl text-center text-xs font-bold">
+              🚀 Meta Semanal Atingida!
+            </div>
+          </div>
+
+        </div>
+
+        {/* Tabela de Histórico Recente */}
+        <div className="bg-white rounded-[32px] shadow-md border border-brand-orange/5 overflow-hidden">
+          <div className="p-6 border-b border-slate-50">
+            <h3 className="font-black text-slate-800 text-lg tracking-tight">Últimas Movimentações</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                  <th className="p-4">ID</th>
+                  <th className="p-4">Cliente</th>
+                  <th className="p-4">Item Solicitado</th>
+                  <th className="p-4 text-right">Valor</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm font-medium text-slate-600">
+                {pedidosSimulados.map((pedido) => (
+                  <tr key={pedido.id} className="hover:bg-brand-bg/20 transition-colors">
+                    <td className="p-4 font-bold text-slate-400">#{pedido.id}</td>
+                    <td className="p-4 text-slate-800 font-bold">{pedido.cliente}</td>
+                    <td className="p-4">{pedido.item}</td>
+                    <td className="p-4 text-right font-black text-brand-green">
+                      R$ {pedido.valor.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+export default Relatorios;
+
+restaurantes:
+Restaurantes.tsx:
+// src/pages/restaurantes/Restaurantes.tsx
+import { Link } from 'react-router-dom';
+
+function Restaurantes() {
+  const parceiros = [
+    { id: 1, nome: "Burger King - Centro", categoria: "Fast Food", status: "Ativo", pedidos: 145 },
+    { id: 2, nome: "Pizzaria Bella Napoli", categoria: "Italiana", status: "Ativo", pedidos: 89 },
+    { id: 3, nome: "Sushi House", categoria: "Japonesa", status: "Inativo", pedidos: 0 },
+  ];
+
+  return (
+    <div className="min-h-screen bg-brand-bg p-6 animate-reveal-up">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Header com Ação */}
+        <div className="bg-white p-8 rounded-[32px] shadow-md border border-brand-orange/10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center md:text-left">
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight">Restaurantes Parceiros</h1>
+            <p className="text-slate-500 font-medium text-sm">Gerencie os estabelecimentos vinculados ao ecossistema Delivra.</p>
+          </div>
+          
+          <Link to="/cadastrar-restaurante" className="bg-brand-orange text-white px-8 py-4 rounded-2xl font-black shadow-md animate-pulse-glow hover:scale-105 transition-all">
+            + Cadastrar Restaurante
+          </Link>
+        </div>
+
+        {/* Grid de Restaurantes */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {parceiros.map((res) => (
+            <div key={res.id} className="bg-white p-6 rounded-[24px] border border-brand-orange/5 shadow-sm hover:shadow-xl transition-all group animate-card-entrance">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-brand-bg rounded-2xl flex items-center justify-center text-3xl group-hover:rotate-12 transition-transform">
+                  🏪
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-800 text-lg leading-tight">{res.nome}</h3>
+                  <span className="text-brand-orange text-xs font-bold uppercase">{res.categoria}</span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center py-3 border-t border-slate-50">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+                  <span className={`text-xs font-black ${res.status === 'Ativo' ? 'text-brand-green' : 'text-red-500'}`}>
+                    ● {res.status}
+                  </span>
+                </div>
+                <div className="flex flex-col text-right">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Pedidos/Mês</span>
+                  <span className="text-slate-700 font-black">{res.pedidos}</span>
+                </div>
+              </div>
+
+              <button className="w-full mt-4 py-3 bg-slate-50 text-slate-600 font-bold text-xs rounded-xl hover:bg-brand-green hover:text-white transition-all">
+                Ver Cardápio
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Restaurantes;
+
+App.css:
+@import "tailwindcss";
+@plugin "tailwindcss-animated";
+
+@theme {
+  /* A Paleta de Cores Real do Projeto de Vocês 🎨 */
+  --color-brand-bg: #fff3d1;
+  --color-brand-orange: #f59a3a;
+  --color-brand-green: #265c2e;
+
+  /* Mantendo as Animações que combinamos */
+  --animate-bounce-slow: bounce 3s infinite;
+  --animate-pulse-subtle: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 2s infinite;
+  --animate-reveal-up: reveal-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-card-entrance: card-entrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 154, 58, 0.7); }
+    50% { transform: scale(1.02); box-shadow: 0 0 20px 10px rgba(245, 154, 58, 0); }
+  }
+  @keyframes reveal-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes card-entrance {
+    0% { opacity: 0; transform: scale(0.9) translateY(15px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+}
+
+App.tsx:
+// src/App.tsx
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import './App.css';
+import { AuthProvider } from './contexts/AuthContext';
+import Navbar from './components/navbar/Navbar';
+import Footer from './components/footer/Footer';
+import Login from './pages/login/Login';
+import Home from './pages/home/Home';
+import Cadastro from './pages/cadastro/Cadastro';
+import Perfil from './pages/perfil/Perfil'; // Importe o Perfil
+import FiltrarSaudavel from './components/especial/filtrarsaudavel/FiltrarSaudavel'; // Importe o filtro
+
+import ListarCategoria from './components/categoria/listarcategoria/ListarCategoria';
+import FormCategoria from './components/categoria/formcategoria/FormCategoria';
+import DeletarCategoria from './components/categoria/deletarcategoria/DeletarCategoria';
+import ListarProduto from './components/produto/listarproduto/ListarProduto';
+import FormProduto from './components/produto/formproduto/FormProduto';
+import DeletarProduto from './components/produto/deletarproduto/DeletarProduto';
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
+          <div className="grow">
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/cadastro" element={<Cadastro />} />
+              <Route path="/perfil" element={<Perfil />} />
+              <Route path="/filtrarsaudavel" element={<FiltrarSaudavel />} />
+              
+              <Route path="/categorias" element={<ListarCategoria />} />
+              <Route path="/cadastrarcategoria" element={<FormCategoria />} />
+              <Route path="/editarcategoria/:id" element={<FormCategoria />} />
+              <Route path="/deletarcategoria/:id" element={<DeletarCategoria />} />
+              
+              <Route path="/produtos" element={<ListarProduto />} />
+              <Route path="/cadastrarproduto" element={<FormProduto />} />
+              <Route path="/editarproduto/:id" element={<FormProduto />} />
+              <Route path="/deletarproduto/:id" element={<DeletarProduto />} />
+            </Routes>
+          </div>
+          <Footer />
+        </div>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
+export default App;
+
+index.css:
+@import "tailwindcss";
+
+main.tsx:
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+index.html:
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>delivragency</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
+tailwind.config.js:
+export default {}
+
+As ideias são:
+
+Adicionar o carrinho, ao clicar, mostra os produtos.
+Colocar mais produtos saudáveis e de fastfood.
+Deixar a barra de pesquisa na home funcional, pesquisando pelas categorias que existem, ingredientes ou produtos.
+Preciso da descrição para deixar em cada produto.
+Na parte de restaurantes, coloque alguns apenas para mostrarar algo.
+Na parte de relatórios, mostre o gráfico, lucro, clientes e vendas.
+
+clicando em produtos e categorias aparece o que realmente precisa aparecer nisso, na aba de produtos, é o cardápio, o que for cadastrado, aparecerá lá.
+
+Quero que consiga identificar com emojis qualquer coisa de fastfood, saudável e bebida.
+
+Por enquanto é isso, e mais uma vez NÃO SIMPLIFIQUE NADA, NÃO MEXA NO CRUD E EM NADA NO FUNCIONAMENTO DELE, POR FAVOR.

@@ -1,22 +1,39 @@
-import axios from 'axios'
+// src/services/Service.ts
+import axios from "axios";
 
 export const api = axios.create({
-   baseURL: 'http://localhost:3001',
-})
+  // Trocado temporariamente para testar o backend rodando localmente
+  // baseURL: "https://delivra-api-production.up.railway.app" 
+  baseURL: "http://localhost:3002"
+});
 
-export async function buscar(url: string, setDados: Function) {
-  const resposta = await api.get(url)
-  setDados(resposta.data)
-}
+// Autenticação e Criação de Conta (Rotas Públicas)
+export const login = async (url: string, dados: Object, setDados: Function) => {
+  const resposta = await api.post(url, dados);
+  setDados(resposta.data);
+};
 
-export async function cadastrar(url: string, dados: object) {
-  return await api.post(url, dados)
-}
+export const cadastrarUsuario = async (url: string, dados: Object, setDados: Function) => {
+  const resposta = await api.post(url, dados);
+  setDados(resposta.data);
+};
 
-export async function atualizar(url: string, dados: object) {
-  return await api.put(url, dados)
-}
+// Métodos do CRUD Protegidos (Exigem o Token de Autenticação passado no Header)
+export const buscar = async (url: string, setDados: Function, header: Object) => {
+  const resposta = await api.get(url, header);
+  setDados(resposta.data);
+};
 
-export async function deletar(url: string) {
-  return await api.delete(url)
-}
+export const cadastrar = async (url: string, dados: Object, setDados: Function, header: Object) => {
+  const resposta = await api.post(url, dados, header);
+  setDados(resposta.data);
+};
+
+export const atualizar = async (url: string, dados: Object, setDados: Function, header: Object) => {
+  const resposta = await api.put(url, dados, header);
+  setDados(resposta.data);
+};
+
+export const deletar = async (url: string, header: Object) => {
+  await api.delete(url, header);
+};
